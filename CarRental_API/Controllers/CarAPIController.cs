@@ -1,8 +1,11 @@
 ﻿using CarRental_API.Data;
 using CarRental_API.Models;
 using CarRental_API.Models.Dto;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using System.Reflection.Metadata.Ecma335;
+using System.Security.Cryptography;
+using System.Text.Json;
 
 namespace CarRental_API.Controllers
 {
@@ -100,8 +103,8 @@ namespace CarRental_API.Controllers
             return NoContent();
         }
 
-        [HttpPatch("id")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
+        [HttpPut("id")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public ActionResult<CarDto> Update(CarDto car)
@@ -109,9 +112,39 @@ namespace CarRental_API.Controllers
             var carLists = CarStore.carsLists.FirstOrDefault(u => u.Id == car.Id);
 
             carLists.Name = car.Name;
-
+            carLists.Price = car.Price;
 
             return CreatedAtRoute("GetCar", new { id = carLists.Id }, carLists);
+        }
+
+
+        [HttpPatch("id")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public ActionResult<CarDto> PartialUpdate(int id, JsonPatchDocument<CarDto> carPatch)
+        {
+            if (id == 0)
+            {
+                return BadRequest();
+            }
+
+            var carFromList = CarStore.carsLists.FirstOrDefault(u => u.Id == id);
+            if (carFromList == null)
+            {
+                return BadRequest();
+            }
+
+            carPatch.ApplyTo(carFromList, ModelState);
+
+            if(!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            return NoContent();
+
+
+
         }
 
     }
