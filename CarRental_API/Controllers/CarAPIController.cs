@@ -1,4 +1,5 @@
-﻿using CarRental_API.Models;
+﻿using CarRental_API.Data;
+using CarRental_API.Models;
 using CarRental_API.Models.Dto;
 using Microsoft.AspNetCore.Mvc;
 using System.Reflection.Metadata.Ecma335;
@@ -10,17 +11,50 @@ namespace CarRental_API.Controllers
     public class CarAPIController : ControllerBase
     {
         [HttpGet]
-        public IEnumerable<CarDto> GetCars()
+        public ActionResult<IEnumerable<CarDto>> GetCars()
         {
 
-            return new List<CarDto>
+            return Ok(CarStore.carsLists);
+        }
+        [HttpGet("id")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public  ActionResult<CarDto> GetCar(int id)
+        {
+            if (id == 0)
             {
-                new CarDto { Id = 1,Name="BMW"},
-                new CarDto { Id = 2,Name="Audi"}
-            };
+                return BadRequest();
+            }
+            var carFromDb = CarStore.carsLists.FirstOrDefault(u=>u.Id==id);
+            if(carFromDb == null)
+            {
+                return NotFound();
+            }
+            return Ok(carFromDb);  
+        }
+        [HttpPost]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public ActionResult<CarDto> CreateCar([FromBody]CarDto carDto)
+        {
+            if(carDto == null)
+            {
+                return BadRequest(carDto);
+            }
+            if (carDto.Id > 0)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError);
+            }
+            
+            carDto.Id = CarStore.carsLists.OrderByDescending(u => u.Id).FirstOrDefault().Id + 1;
+            CarStore.carsLists.Add(carDto);
+
+            return Ok(carDto);
+
 
         }
-
 
     }
 }
