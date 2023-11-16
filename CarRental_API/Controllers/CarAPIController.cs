@@ -1,4 +1,5 @@
 ﻿using CarRental_API.Models;
+using CarRental_API.Models.Dto;
 using Microsoft.AspNetCore.Mvc;
 using System.Reflection.Metadata.Ecma335;
 
@@ -8,12 +9,14 @@ namespace CarRental_API.Controllers
     [ApiController]
     public class CarAPIController : ControllerBase
     {
-        public IEnumerable<Car> GetCars()
+        [HttpGet]
+        public IEnumerable<CarDto> GetCars()
         {
-            return new List<Car>
+
+            return new List<CarDto>
             {
-                new Car { Id = 1,Name="BMW"},
-                new Car { Id = 2,Name="Audi"}
+                new CarDto { Id = 1,Name="BMW"},
+                new CarDto { Id = 2,Name="Audi"}
             };
 
         }
