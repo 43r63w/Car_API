@@ -1,9 +1,12 @@
-﻿namespace CarRental_API.Models.Dto
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace CarRental_API.Models.Dto
 {
     public class CarDto
     {
         public int Id { get; set; }
 
+        [Required]
         public string Name { get; set; }
     }
 }
